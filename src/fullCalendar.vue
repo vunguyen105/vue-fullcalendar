@@ -64,7 +64,8 @@
           <div class="more-body">
             <ul class="body-list">
               <li v-for="event in selectDay.events"
-                  v-show="event.isShow" class="body-item"
+                  v-show="event.isShow"
+                  :class="[event.hasOwnProperty('class') ? event.class+' body-item' : 'body-item']"
                   @click="eventClick(event, $event)">
                 {{event.title}}
               </li>
