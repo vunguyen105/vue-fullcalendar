@@ -1,10 +1,16 @@
 {
-  "name": "vue-fullcalendar",
-  "version": "0.1.9",
-  "author": "Sunny Wang",
-  "license": "MIT",
+  "name": "vuejs-fullcalendar",
+  "version": "1.0.2",
   "description": "pure vue-based fullcalendar, no jquery moment required",
   "main": "dist/vue-fullcalendar.js",
+
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vunguyen105/vue-fullcalendar.git"
+  },
+  "author": "nguyenvu",
+  "license": "MIT",
+
   "files": [
     "dist/vue-fullcalendar.js",
     "dist/vue-fullcalendar.min.js",
@@ -13,10 +19,6 @@
   "scripts": {
     "dev": "webpack-dev-server --output-public-path=/static/ --inline --hot",
     "build": "webpack --progress --hide-modules --config webpack.build.js && webpack --progress --hide-modules --config webpack.build.min.js -p"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Wanderxx/vue-fullcalendar.git"
   },
   "devDependencies": {
     "autoprefixer-core": "^6.0.1",
@@ -52,7 +54,7 @@
     "fullcalendar"
   ],
   "bugs": {
-    "url": "https://github.com/Wanderxx/vue-fullcalendar/issues"
+    "url": "https://github.com/vunguyen105/vue-fullcalendar/issues"
   },
-  "homepage": "https://github.com/Wanderxx/vue-fullcalendar#readme"
+  "homepage": "https://github.com/vunguyen105/vue-fullcalendar#readme"
 }
