@@ -24,22 +24,33 @@
     },
     props : {
       currentDate : {},
-      titleFormat : {}
+      titleFormat : {},
+      firstDay    : {},
+      monthNames  : {}
     },
     data () {
       return {
         title      : '',
         leftArrow  : '<',
-        rightArrow : '>'
+        rightArrow : '>',
+        headDate : new Date()
+      }
+    },
+    watch : {
+      currentDate (val) {
+        if (!val) return
+        this.headDate = val
+        console.log('currentDate', val)
+        // this.headDate = JSON.parse(JSON.stringify(val))
       }
     },
     methods : {
       goPrev () {
-        this.currentDate = this.changeMonth(this.currentDate, -1)
+        this.headDate = this.changeMonth(this.headDate, -1)
         this.dispatchEvent()
       },
       goNext () {
-        this.currentDate = this.changeMonth(this.currentDate, 1)
+        this.headDate = this.changeMonth(this.headDate, 1)
         this.dispatchEvent()
       },
       changeMonth (date, num) {
@@ -47,24 +58,27 @@
         return new Date(dt.setMonth(dt.getMonth() + num))
       },
       dispatchEvent() {
-        this.title = dateFunc.format(this.currentDate, this.titleFormat)
+        this.title = dateFunc.format(this.headDate, this.titleFormat, this.monthNames)
 
-        let startDate = dateFunc.getStartDate(this.currentDate)
+        let startDate = dateFunc.getStartDate(this.headDate)
         let curWeekDay = startDate.getDay()
 
         // 1st day of this monthView
-        startDate.setDate(startDate.getDate() - curWeekDay + 1) 
+        let diff = parseInt(this.firstDay) - curWeekDay
+        if (diff) diff -= 7
+        startDate.setDate(startDate.getDate() + diff) 
 
         // the month view is 6*7
         let endDate = dateFunc.changeDay(startDate, 41)
 
         // 1st day of current month
-        let currentDate = dateFunc.getStartDate(this.currentDate)
+        let currentDate = dateFunc.getStartDate(this.headDate)
 
-        this.$dispatch('changeMonth', 
+        this.$emit('change', 
           dateFunc.format(startDate, 'yyyy-MM-dd'),
           dateFunc.format(endDate, 'yyyy-MM-dd'),
-          dateFunc.format(currentDate,'yyyy-MM-dd')
+          dateFunc.format(currentDate,'yyyy-MM-dd'),
+          this.headDate
         )
       }
     }

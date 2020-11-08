@@ -12,13 +12,16 @@
     {
       title: 'Sunny 728-730',
       start: '2020-07-25',
-      end: '2020-07-27'
+      end: '2020-07-27',
+      classEvent: 'red',
+      cssClass: 'red',
     },
     {
       title: 'Sunny 726-727',
-      start: '2020-11-11',
-      end: '2020-11-12',
-      classEvent: 'xxx'
+      start: '2020-11-11 10:00:00',
+      end: '2020-11-12 11:00:00',
+      classEvent: 'red',
+      cssClass: 'red',
     },
     {
       title: 'Sunny 727-728',

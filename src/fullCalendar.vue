@@ -1,7 +1,16 @@
 <template>
   <div class="comp-full-calendar">
     <!-- header pick month -->
-    <fc-header :current-date.sync="currentDate" :title-format="titleFormat">
+    <fc-header :current-date="currentDate" 
+      :title-format="titleFormat"
+      :first-day="firstDay"
+      :month-names="monthNames"
+      @change="emitChangeMonth">
+
+      <div slot="header-left">
+        <slot name="fc-header-left">
+        </slot>
+      </div>
 
       <div slot="header-right">
         <slot name="fc-header-right">
@@ -9,7 +18,10 @@
       </div>
     </fc-header>
     <!-- body display date day and events -->
-    <fc-body :current-date="currentDate" :events="events" :month-names="monthNames" :week-names="weekNames">
+    <fc-body :current-date="currentDate" :events="events" :month-names="monthNames" 
+      :week-names="weekNames" :first-day="firstDay"
+      @eventclick="emitEventClick" @dayclick="emitDayClick"
+      @moreclick="emitMoreClick">
       <div slot="body-card">
         <slot name="fc-body-card">
         </slot>
@@ -28,7 +40,15 @@
       },
       lang : {
         type : String,
-        default : 'zh'
+        default : 'en'
+      },
+      firstDay : {
+        type : Number | String,
+        validator (val) {
+          let res = parseInt(val)
+          return res >= 0 && res <= 6
+        },
+        default : 0
       },
       titleFormat : {
         type : String,
@@ -45,15 +65,31 @@
       weekNames : {
         type : Array,
         default () {
-          return langSets[this.lang].weekNames
+          let arr = langSets[this.lang].weekNames
+          return arr.slice(this.firstDay).concat(arr.slice(0, this.firstDay))
         }
       }
-    },
-    created () {
     },
     data () {
       return {
         currentDate : new Date()
+      }
+    },
+    methods : {
+      emitChangeMonth (start, end, currentStart, current) {
+        console.log('currentDate 2', this.currentDate)
+        this.currentDate = current
+        console.log('currentDate 3', this.currentDate)
+        this.$emit('changeMonth', start, end, currentStart)
+      },
+      emitEventClick (event, jsEvent, pos) {
+        this.$emit('eventClick', event, jsEvent, pos)
+      },
+      emitDayClick (day, jsEvent) {
+        this.$emit('dayClick', day, jsEvent)
+      },
+      emitMoreClick (day, events, jsEvent) {
+        this.$emit('moreClick', day, events, jsEvent)
       }
     },
     components : {

@@ -3,8 +3,8 @@
     <div class="weeks">
       <strong class="week" v-for="week in weekNames">{{week}}</strong>
     </div>
-    <div class="dates" v-el:dates>
-      <div calss="dates-bg">
+    <div class="dates" ref="dates">
+      <div class="dates-bg">
         <div class="week-row" v-for="week in currentDates">
           <div class="day-cell" v-for="day in week"
             :class="{'today' : day.isToday,
@@ -23,13 +23,15 @@
             <p class="day-number">{{day.monthDay}}</p>
             <div class="event-box">
               <p class="event-item" v-for="event in day.events" v-show="event.cellIndex <= eventLimit"
-                 :class="{
+                 :class="[event.hasOwnProperty('classEvent') ? event.classEvent : '',
+                 {
+                  'event-item' : true,
                   'is-start'   : isStart(event.start, day.date),
                   'is-end'     : isEnd(event.end,day.date),
-                  'is-opacity' : !event.isShow
-                  }" 
+                  'is-opacity' : !event.isShow,
+                  }]"
                 @click="eventClick(event,$event)">
-                {{event | isBegin day.date day.weekDay}}
+                {{isBegin(event, day.date, day.weekDay)}}
               </p>
               <p v-if="day.events.length > eventLimit"
                 class="more-link" @click.stop="selectThisDay(day, $event)">
@@ -44,14 +46,14 @@
       <div class="more-events" v-show="showMore"
         :style="{left: morePos.left + 'px', top: morePos.top + 'px'}">
         <div class="more-header">
-          <span class="title">{{selectDay.date | moreTitle }}</span>
+          <span class="title">{{moreTitle(selectDay.date)}}</span>
           <span class="close" @click.stop="showMore = false">x</span>
         </div>
         <div class="more-body">
           <ul class="body-list">
             <li v-for="event in selectDay.events"
               v-show="event.isShow"
-                :class="[event.hasOwnProperty('classEvent') ? event.classEvent+' body-item' : 'body-item']"
+               :class="[event.hasOwnProperty('classEvent') ? event.classEvent+' body-item' : 'body-item']"
               @click="eventClick(event,$event)">
               {{event.title}}
             </li>
@@ -72,9 +74,13 @@
   export default {
     props : {
       currentDate : {},
-      events  : {},
-      weekNames : {},
-      monthNames : {}
+      events      : {},
+      weekNames   : {
+        type : Array,
+        default : []
+      },
+      monthNames  : {},
+      firstDay    : {}
     },
     created () {
       this.events.forEach((item, index) => {
@@ -98,7 +104,17 @@
         selectDay : {}
       }
     },
-    filters : {
+    watch : {
+      weekNames (val) {
+        console.log('watch weekNames', val)
+      }
+    },
+    computed : {
+      currentDates () {
+        return this.getCalendar()
+      }
+    },
+    methods : {
       isBegin (event, date, index) {
         let st = new Date(event.start)
 
@@ -110,30 +126,34 @@
       moreTitle (date) {
         let dt = new Date(date)
         return this.weekNames[dt.getDay()] + ', ' + this.monthNames[dt.getMonth()] + dt.getDate()
-      }
-    },
-    computed : {
-      currentDates () {
-        return this.getCalendar()
-      }
-    },
-    methods : {
+      },
+      classNames (cssClass) {
+        if(!cssClass) return ''
+        // string  
+        if (typeof cssClass == 'string') return cssClass
+
+        // Array
+        if (Array.isArray(cssClass)) return cssClass.join(' ')
+        
+        // else
+        return ''
+      },
       getCalendar () {
         // calculate 2d-array of each month
         // first day of this month
         let now = new Date() // today
         let current = new Date(this.currentDate)
 
-        let startDate = dateFunc.getStartDate(current)
-        // let duration = this.getDuration(current) - 1
-        // let endDate = this.changeDay(startDate,duration)
+        let startDate = dateFunc.getStartDate(current) // 1st day of this month
 
         let curWeekDay = startDate.getDay()
-        // begin date of this table may be some day of last month
-        startDate.setDate(startDate.getDate() - curWeekDay)
 
+        // begin date of this table may be some day of last month
+        let diff = parseInt(this.firstDay) - curWeekDay
+        diff = diff > 0 ? (diff - 7) : diff
+
+        startDate.setDate(startDate.getDate() + diff)
         let calendar = []
-        // let isFinal = false
 
         for(let perWeek = 0 ; perWeek < 6 ; perWeek++) {
 
@@ -155,14 +175,12 @@
             //   break
             // }
           }
-
           calendar.push(week)
           // if (isFinal) break
-
         }
         return calendar
       },
-      slotEvents(date) {
+      slotEvents (date) {
 
         // find all events start from this date
         let cellIndexArr = []
@@ -170,6 +188,7 @@
           let dt = new Date(day.start)
           let st = new Date(dt.getFullYear(),dt.getMonth(),dt.getDate())
           let ed = day.end ? new Date(day.end) : st
+          // console.log('slotEvt', st, ed, date)
           return date>=st && date<=ed
         })
 
@@ -212,27 +231,26 @@
         let events = day.events.filter(item =>{
           return item.isShow == true
         })
-        this.$dispatch('moreClick', day.date, events, jsEvent)
+        this.$emit('moreclick', day, events, jsEvent)
       },
       computePos (target) {
         let eventRect = target.getBoundingClientRect()
-        let pageRect = this.$els.dates.getBoundingClientRect()
+        let pageRect = this.$refs.dates.getBoundingClientRect()
         return {
           left : eventRect.left - pageRect.left,
           top  : eventRect.top + eventRect.height - pageRect.top
         }
       },
       dayClick(day, jsEvent) {
-        this.$dispatch('dayClick', day, jsEvent)
+        this.$emit('dayclick', day, jsEvent)
       },
       eventClick(event, jsEvent) {
-        console.log('cellIndex', event.cellIndex)
         if (!event.isShow) {
           return
         }
         jsEvent.stopPropagation()
         let pos = this.computePos(jsEvent.target)
-        this.$dispatch('eventClick', event, jsEvent, pos)
+        this.$emit('eventclick', event, jsEvent, pos)
       }
     }
   }
@@ -328,6 +346,9 @@
                 opacity: 0;
               }
             }
+            .event-item.red{
+              background-color: #ffa3e8;
+            }
             .more-link{
               cursor: pointer;
               // text-align: right;
@@ -381,6 +402,9 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+          }
+          .body-item.red{
+            background-color: #ffa3e8;
           }
         }
       }

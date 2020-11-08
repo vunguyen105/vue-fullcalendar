@@ -1,6 +1,6 @@
 {
   "name": "vuejs-fullcalendar",
-  "version": "1.0.2",
+  "version": "1.0.6",
   "description": "pure vue-based fullcalendar, no jquery moment required",
   "main": "dist/vue-fullcalendar.js",
 
