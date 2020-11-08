@@ -1,4 +1,4 @@
-##vue-fullcalendar
+##vuejs-fullcalendar
 
 [![npm](https://img.shields.io/npm/v/vue-fullcalendar.svg?maxAge=2592000?style=flat-square)]()
 [![npm](https://img.shields.io/npm/dt/vue-fullcalendar.svg?maxAge=2592000?style=flat-square)]()
@@ -14,7 +14,7 @@
 By NPM
 
 ```shell
-npm install vue-fullcalendar --save
+npm install vuejs-fullcalendar --save
 ```
 or download code and include it
 
@@ -67,7 +67,7 @@ export default {
 	}
   },
   components : {
-	'full-calendar': require('vue-fullcalendar')	
+	'full-calendar': require('vuejs-fullcalendar')	
   }
 }
 ```
