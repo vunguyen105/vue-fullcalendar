@@ -1,8 +1,7 @@
-var path    = require('path');
-var webpack = require('webpack');
+var path    = require('path')
+var webpack = require('webpack')
 
-module.exports = {
-  devtool: 'source-map',
+module.exports={
 	entry:'./demo/main.js',
 	output:{
 		path:path.resolve(__dirname, 'static'),
@@ -54,11 +53,11 @@ module.exports = {
     plugins: ['transform-runtime']
   },
   devServer: {
-    port : 8070,
+    port : 8080,
     historyApiFallback: true,
     stats : {
       colors : true,
       chunks : false
     }
   }
-};
+}

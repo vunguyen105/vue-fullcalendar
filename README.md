@@ -3,9 +3,9 @@
 [![npm](https://img.shields.io/npm/v/vue-fullcalendar.svg?maxAge=2592000?style=flat-square)]()
 [![npm](https://img.shields.io/npm/dt/vue-fullcalendar.svg?maxAge=2592000?style=flat-square)]()
 
->Works for Vue2 now. This is a fullCalendar component based on vue.js . No Jquery or fullCalendar.js required. Currently, It only supports month view. It's inspired by fullCalendar.io but not cloned by it. So please read the docs here below to understand all features.
+>So as it's called. This is a fullCalendar component based on vue.js . No Jquery or fullCalendar.js required. Currently, It only supports month view. I will use fc stands for vue-fullcalendar in following words.
 
-[Simple Live Demo](https://wanderxx.github.io/vue-fullcalendar/)
+[Simple Live Demo](http://wanderxx.github.io/fullcalendar)
 
 ![demo.gif](http://g.recordit.co/vovteJ5m9o.gif)
 
@@ -13,15 +13,8 @@
 
 By NPM
 
-`@latest` works for Vue2
-`0.1.11` works for Vue1.*
-
 ```shell
-// for Vue2
-npm install vue-fullcalendar@latest --save 
-
-// for Vue1
-npm install vue-fullcalendar@0.1.11 --save 
+npm install vue-fullcalendar --save
 ```
 or download code and include it
 
@@ -42,18 +35,6 @@ import fullCalendar from 'vue-fullcalendar'
 
 Vue.component('full-calendar', fullCalendar)
 
-// Vue2
-new Vue({
-  el : '#app',
-  render: h => h(App),
-  template : '<App/>',
-  components : {
-    App
-  }
-})
-
-//Vue1
-
 new Vue({
 	el : 'body',
 	components : {
@@ -68,7 +49,7 @@ or register locally in your `.vue` file
 ### Example
 
 ```html
-<full-calendar :events="fcEvents" locale="en"></full-calendar>
+<full-calendar :events="fcEvents" lang="en"></full-calendar>
 ```
 
 ```javascript
@@ -105,14 +86,12 @@ A sample screenshot is here,
 	  {
 	    title     :  'event1',
 	    start     : '2016-07-01'，
-	    cssClass  : 'family',
 	    YOUR_DATA : {}
 	  },
 	  {
 	    title     : 'event2',
 	    start     : '2016-07-02',
 	    end       : '2016-07-03',
-	    cssClass  : ['family', 'career']
 	    YOUR_DATA : {}
 	  }
 	]         
@@ -123,20 +102,35 @@ A sample screenshot is here,
 	- `start` is the start day of this event
 	
 	- `end` is the end day of this event
-
-	- `cssClass` is css class of each event label, such that, you will be able to set different colors, style ..
 	
 	- `YOUR_DATA` You can define as many data you want as possible
 
-2. **locale** : langague of things like monthNames weekNames and titleFormat. Support same locales than [moment.js](http://momentjs.com/docs/#/i18n/)
+2. **lang** : langague of things like monthNames weekNames and titleFormat
+
+	```javascript
+	export default {
+	  en : {
+	    weekNames :  ['Sun', 'Mon','Tue','Wed','Thu','Fri','Sat'],
+	    monthNames : ['January','February','March','April','May','June','July','August','September','October','November','December'],
+	    titleFormat : 'MM/yyyy'
+	  },
+	  zh : {
+	    weekNames : ['周一','周二','周三','周四','周五','周六','周日'],
+	    monthNames : ['1月','2月','3月','4月','5月','6月','7月','8月','9月','11月','12月'],
+	    titleFormat : 'yyyy年MM月'
+	  }
+	}
+	```
+
+	- `option` : `zh` | `en`
 	
-	- `default` : `en`
+	- `default` : `zh`
 
-3. **firstDay** : first day of the week, `Number`, default: 0 (Sunday)
-	Sunday=0, Monday=1, Tuesday=2, etc.
-	Any number smaller than 0 or larger than 6 will be set to 0.
+3. **monthNames** 
 
-    - `default` : 0
+4. **weekNames**
+
+5. **titleFormat**
 
 #### events
 
@@ -148,11 +142,11 @@ fc will dispatch some events out.
 	this.$dispatch('changeMonth', start, end, current)
 	```
 	
-	- `start` is the first day of current monthView (`moment` object)
+	- `start` is the first day of current monthView
 	
-	- `end` is the last day of current monthView (`moment` object)
+	- `end` is the last day of current monthView
 	
-	- `current` is the first day of current month (`moment` object) 
+	- `current` is the first day of current month 
 
 2. **eventClick** : Every time you click a event, fc will dispatch **eventClick**
 
@@ -173,26 +167,12 @@ fc will dispatch some events out.
 	this.$dispatch('eventClick', day, jsEvent)
 	```
 	
-	- `date` is a Date Object of the day you click (`moment` object)
+	- `day` is a Date Object of the day you click
 	
 	- `jsEvent` holds the native javascript event
 
-4. **moreClick** : fc dispatch it when you click a `more` button
-
-    - `date` is the date corresponding to the "more" clicked (`moment` object) 
-    
-    - `events` is the list of events that will be in the box
-    
-    - `jsEvent` holds the native javascript event
-
-#### slots
-
-You will be able to register your own stuff by using slots
-
-1. **fc-header-left** : top left area
-
-2. **fc-header-right** : top right area. In my case, I added a filter menu there 
-
-3. **fc-body-card** : inside the body area, usually working with `EventClick`, to display a event detail
-
 ###END
+
+
+      
+

@@ -17,36 +17,55 @@
 </template>
 <script type="text/babel">
   import dateFunc from './dateFunc'
-  import moment from 'moment';
 
   export default {
+    created () {
+      this.dispatchEvent()
+    },
     props : {
-      currentMonth : {},
-      titleFormat  : {},
-      firstDay     : {},
-      monthNames   : {},
-      locale       : {}
+      currentDate : {},
+      titleFormat : {}
     },
     data () {
       return {
+        title      : '',
         leftArrow  : '<',
         rightArrow : '>'
       }
     },
-    computed: {
-      title () {
-        if (!this.currentMonth) return;
-        return this.currentMonth.locale(this.locale).format('MMMM YYYY')
-      }
-    },
     methods : {
       goPrev () {
-        var newMonth = moment(this.currentMonth).subtract(1, 'months').startOf('month');
-        this.$emit('change', newMonth);
+        this.currentDate = this.changeMonth(this.currentDate, -1)
+        this.dispatchEvent()
       },
       goNext () {
-        var newMonth = moment(this.currentMonth).add(1, 'months').startOf('month');
-        this.$emit('change', newMonth);
+        this.currentDate = this.changeMonth(this.currentDate, 1)
+        this.dispatchEvent()
+      },
+      changeMonth (date, num) {
+        let dt = new Date(date)
+        return new Date(dt.setMonth(dt.getMonth() + num))
+      },
+      dispatchEvent() {
+        this.title = dateFunc.format(this.currentDate, this.titleFormat)
+
+        let startDate = dateFunc.getStartDate(this.currentDate)
+        let curWeekDay = startDate.getDay()
+
+        // 1st day of this monthView
+        startDate.setDate(startDate.getDate() - curWeekDay + 1) 
+
+        // the month view is 6*7
+        let endDate = dateFunc.changeDay(startDate, 41)
+
+        // 1st day of current month
+        let currentDate = dateFunc.getStartDate(this.currentDate)
+
+        this.$dispatch('changeMonth', 
+          dateFunc.format(startDate, 'yyyy-MM-dd'),
+          dateFunc.format(endDate, 'yyyy-MM-dd'),
+          dateFunc.format(currentDate,'yyyy-MM-dd')
+        )
       }
     }
   }
