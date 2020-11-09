@@ -16,8 +16,8 @@
 
       <!-- absolute so we can make dynamic td -->
       <div class="dates-events">
-        <div class="events-week" v-for="week in currentDates">
-          <div class="events-day" v-for="day in week" track-by="$index"
+        <div class="events-week" v-for="(week, ntd) in currentDates">
+          <div class="events-day" v-for="(day, index) in week" track-by="$index"
             :class="{'today' : day.isToday,
               'not-cur-month' : !day.isCurMonth}" @click.stop="dayClick(day.date, $event)">
             <p class="day-number">{{day.monthDay}}</p>
@@ -34,7 +34,7 @@
                 {{isBegin(event, day.date, day.weekDay)}}
               </p>
               <p v-if="day.events.length > eventLimit"
-                class="more-link" @click.stop="selectThisDay(day, $event)">
+                class="more-link" @click.stop="selectThisDay(day, $event, index, ntd)">
                 + {{day.events[day.events.length -1].cellIndex - eventLimit}} more
               </p>
             </div>
@@ -101,12 +101,18 @@
           top: 0,
           left : 0
         },
+        dayIndex: 0,
+        weekIndex: 0,
         selectDay : {}
       }
     },
     watch : {
       weekNames (val) {
         console.log('watch weekNames', val)
+      },
+      events (val) {
+        let currentDate = this.getCalendar();
+        this.selectDay = currentDate[this.weekIndex][this.dayIndex]
       }
     },
     computed : {
@@ -223,8 +229,11 @@
         let ed = new Date(eventDate)
         return ed.toDateString() == date.toDateString()
       },
-      selectThisDay (day, jsEvent) {
+
+      selectThisDay (day, jsEvent, index, ntd) {
         this.selectDay = day
+        this.dayIndex = index
+        this.weekIndex = ntd
         this.showMore = true
         this.morePos = this.computePos(event.target)
         this.morePos.top -= 100

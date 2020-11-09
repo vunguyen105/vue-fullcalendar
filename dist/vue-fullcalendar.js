@@ -512,7 +512,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      this.$emit('dayClick', day, jsEvent);
 	    },
 	    emitMoreClick: function emitMoreClick(day, events, jsEvent) {
-	      this.$emit('moreClick', day, event, jsEvent);
+	      this.$emit('moreClick', day, events, jsEvent);
 	    }
 	  },
 	  components: {
@@ -705,6 +705,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        top: 0,
 	        left: 0
 	      },
+	      dayIndex: 0,
+	      weekIndex: 0,
 	      selectDay: {}
 	    };
 	  },
@@ -712,6 +714,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  watch: {
 	    weekNames: function weekNames(val) {
 	      console.log('watch weekNames', val);
+	    },
+	    events: function events(val) {
+	      var currentDate = this.getCalendar();
+	      this.selectDay = currentDate[this.weekIndex][this.dayIndex];
 	    }
 	  },
 	  computed: {
@@ -828,15 +834,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var ed = new Date(eventDate);
 	      return ed.toDateString() == date.toDateString();
 	    },
-	    selectThisDay: function selectThisDay(day, jsEvent) {
+	    selectThisDay: function selectThisDay(day, jsEvent, index, ntd) {
 	      this.selectDay = day;
+	      this.dayIndex = index;
+	      this.weekIndex = ntd;
 	      this.showMore = true;
 	      this.morePos = this.computePos(event.target);
 	      this.morePos.top -= 100;
 	      var events = day.events.filter(function (item) {
 	        return item.isShow == true;
 	      });
-	      this.$emit('moreclick', day.date, events, jsEvent);
+	      this.$emit('moreclick', day, events, jsEvent);
 	    },
 	    computePos: function computePos(target) {
 	      var eventRect = target.getBoundingClientRect();
@@ -1036,8 +1044,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	//
 	//       <!-- absolute so we can make dynamic td -->
 	//       <div class="dates-events">
-	//         <div class="events-week" v-for="week in currentDates">
-	//           <div class="events-day" v-for="day in week" track-by="$index"
+	//         <div class="events-week" v-for="(week, ntd) in currentDates">
+	//           <div class="events-day" v-for="(day, index) in week" track-by="$index"
 	//             :class="{'today' : day.isToday,
 	//               'not-cur-month' : !day.isCurMonth}" @click.stop="dayClick(day.date, $event)">
 	//             <p class="day-number">{{day.monthDay}}</p>
@@ -1054,7 +1062,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	//                 {{isBegin(event, day.date, day.weekDay)}}
 	//               </p>
 	//               <p v-if="day.events.length > eventLimit"
-	//                 class="more-link" @click.stop="selectThisDay(day, $event)">
+	//                 class="more-link" @click.stop="selectThisDay(day, $event, index, ntd)">
 	//                 + {{day.events[day.events.length -1].cellIndex - eventLimit}} more
 	//               </p>
 	//             </div>
@@ -1168,7 +1176,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 13 */
 /***/ (function(module, exports) {
 
-	module.exports = "\n  <div class=\"full-calendar-body\">\n    <div class=\"weeks\">\n      <strong class=\"week\" v-for=\"week in weekNames\">{{week}}</strong>\n    </div>\n    <div class=\"dates\" ref=\"dates\">\n      <div class=\"dates-bg\">\n        <div class=\"week-row\" v-for=\"week in currentDates\">\n          <div class=\"day-cell\" v-for=\"day in week\"\n            :class=\"{'today' : day.isToday,\n              'not-cur-month' : !day.isCurMonth}\">\n            <p class=\"day-number\">{{day.monthDay}}</p>\n          </div>\n        </div>\n      </div>\n\n      <!-- absolute so we can make dynamic td -->\n      <div class=\"dates-events\">\n        <div class=\"events-week\" v-for=\"week in currentDates\">\n          <div class=\"events-day\" v-for=\"day in week\" track-by=\"$index\"\n            :class=\"{'today' : day.isToday,\n              'not-cur-month' : !day.isCurMonth}\" @click.stop=\"dayClick(day.date, $event)\">\n            <p class=\"day-number\">{{day.monthDay}}</p>\n            <div class=\"event-box\">\n              <p class=\"event-item\" v-for=\"event in day.events\" v-show=\"event.cellIndex <= eventLimit\"\n                 :class=\"[event.hasOwnProperty('classEvent') ? event.classEvent : '',\n                 {\n                  'event-item' : true,\n                  'is-start'   : isStart(event.start, day.date),\n                  'is-end'     : isEnd(event.end,day.date),\n                  'is-opacity' : !event.isShow,\n                  }]\"\n                @click=\"eventClick(event,$event)\">\n                {{isBegin(event, day.date, day.weekDay)}}\n              </p>\n              <p v-if=\"day.events.length > eventLimit\"\n                class=\"more-link\" @click.stop=\"selectThisDay(day, $event)\">\n                + {{day.events[day.events.length -1].cellIndex - eventLimit}} more\n              </p>\n            </div>\n          </div>\n        </div>\n      </div>\n\n      <!-- full events when click show more -->\n      <div class=\"more-events\" v-show=\"showMore\"\n        :style=\"{left: morePos.left + 'px', top: morePos.top + 'px'}\">\n        <div class=\"more-header\">\n          <span class=\"title\">{{moreTitle(selectDay.date)}}</span>\n          <span class=\"close\" @click.stop=\"showMore = false\">x</span>\n        </div>\n        <div class=\"more-body\">\n          <ul class=\"body-list\">\n            <li v-for=\"event in selectDay.events\"\n              v-show=\"event.isShow\"\n               :class=\"[event.hasOwnProperty('classEvent') ? event.classEvent+' body-item' : 'body-item']\"\n              @click=\"eventClick(event,$event)\">\n              {{event.title}}\n            </li>\n          </ul>\n        </div>\n      </div>\n\n      <slot name=\"body-card\">\n\n      </slot>\n\n    </div>\n  </div>\n";
+	module.exports = "\n  <div class=\"full-calendar-body\">\n    <div class=\"weeks\">\n      <strong class=\"week\" v-for=\"week in weekNames\">{{week}}</strong>\n    </div>\n    <div class=\"dates\" ref=\"dates\">\n      <div class=\"dates-bg\">\n        <div class=\"week-row\" v-for=\"week in currentDates\">\n          <div class=\"day-cell\" v-for=\"day in week\"\n            :class=\"{'today' : day.isToday,\n              'not-cur-month' : !day.isCurMonth}\">\n            <p class=\"day-number\">{{day.monthDay}}</p>\n          </div>\n        </div>\n      </div>\n\n      <!-- absolute so we can make dynamic td -->\n      <div class=\"dates-events\">\n        <div class=\"events-week\" v-for=\"(week, ntd) in currentDates\">\n          <div class=\"events-day\" v-for=\"(day, index) in week\" track-by=\"$index\"\n            :class=\"{'today' : day.isToday,\n              'not-cur-month' : !day.isCurMonth}\" @click.stop=\"dayClick(day.date, $event)\">\n            <p class=\"day-number\">{{day.monthDay}}</p>\n            <div class=\"event-box\">\n              <p class=\"event-item\" v-for=\"event in day.events\" v-show=\"event.cellIndex <= eventLimit\"\n                 :class=\"[event.hasOwnProperty('classEvent') ? event.classEvent : '',\n                 {\n                  'event-item' : true,\n                  'is-start'   : isStart(event.start, day.date),\n                  'is-end'     : isEnd(event.end,day.date),\n                  'is-opacity' : !event.isShow,\n                  }]\"\n                @click=\"eventClick(event,$event)\">\n                {{isBegin(event, day.date, day.weekDay)}}\n              </p>\n              <p v-if=\"day.events.length > eventLimit\"\n                class=\"more-link\" @click.stop=\"selectThisDay(day, $event, index, ntd)\">\n                + {{day.events[day.events.length -1].cellIndex - eventLimit}} more\n              </p>\n            </div>\n          </div>\n        </div>\n      </div>\n\n      <!-- full events when click show more -->\n      <div class=\"more-events\" v-show=\"showMore\"\n        :style=\"{left: morePos.left + 'px', top: morePos.top + 'px'}\">\n        <div class=\"more-header\">\n          <span class=\"title\">{{moreTitle(selectDay.date)}}</span>\n          <span class=\"close\" @click.stop=\"showMore = false\">x</span>\n        </div>\n        <div class=\"more-body\">\n          <ul class=\"body-list\">\n            <li v-for=\"event in selectDay.events\"\n              v-show=\"event.isShow\"\n               :class=\"[event.hasOwnProperty('classEvent') ? event.classEvent+' body-item' : 'body-item']\"\n              @click=\"eventClick(event,$event)\">\n              {{event.title}}\n            </li>\n          </ul>\n        </div>\n      </div>\n\n      <slot name=\"body-card\">\n\n      </slot>\n\n    </div>\n  </div>\n";
 
 /***/ }),
 /* 14 */
